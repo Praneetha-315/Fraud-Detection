@@ -1,0 +1,43 @@
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix
+
+# Synthetic dataset generation (you can replace this with your own dataset)
+np.random.seed(42)
+n_legit = 1000
+n_fraud = 100
+legit_transactions = pd.DataFrame({
+    'amount': np.random.normal(100, 20, n_legit),
+    'type': np.random.choice(['debit', 'credit'], n_legit),
+    'fraud': 0
+})
+fraud_transactions = pd.DataFrame({
+    'amount': np.random.normal(500, 100, n_fraud),
+    'type': 'debit',
+    'fraud': 1
+})
+transactions = pd.concat([legit_transactions, fraud_transactions], ignore_index=True)
+
+# Preprocessing
+transactions['type'] = transactions['type'].map({'debit': 0, 'credit': 1})
+X = transactions[['amount', 'type']]
+y = transactions['fraud']
+
+# Splitting the dataset into train and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Training a Random Forest classifier
+clf = RandomForestClassifier(n_estimators=100, random_state=42)
+clf.fit(X_train, y_train)
+
+# Predictions on the test set
+y_pred = clf.predict(X_test)
+
+# Evaluation
+accuracy = accuracy_score(y_test, y_pred)
+conf_matrix = confusion_matrix(y_test, y_pred)
+
+print("Accuracy:", accuracy)
+print("Confusion Matrix:\n", conf_matrix)
